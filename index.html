@@ -1,357 +1,250 @@
-<html>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>VoiceFilter: Targeted Voice Separation by Speaker-Conditioned Spectrogram Masking</title>
-  <link rel="stylesheet" type="text/css" href="./stylesheet.css">
-  <link rel="shortcut icon" href="./logo.png">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>
+Speech2Face: Learning the Face Behind a Voice
+</title>
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-65563403-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-65563403-4');
+</script>
 </head>
-
 <body>
-  <div>
-    <h1>VoiceFilter: Targeted Voice Separation by Speaker-Conditioned Spectrogram Masking</h1>
+<div class="container">
+  <p>&nbsp;</p>
+  <p><span class="venue">IEEE Conference on Computer Vision and Pattern Recognition (CVPR) 2019</span></p>
+  <p><span class="title">Speech2Face: Learning the Face Behind a Voice</span></p>
+  <br />
+  <table border="0" align="center" class="authors">
+    <tr align="center" valign="bottom">
+	  <td><a href="http://thohkaistackr.wixsite.com/page">Tae-Hyun Oh</a><sup>* &#10013;</sup></td>
+	  <td><a href="http://people.csail.mit.edu/talidekel/">Tali Dekel</a><sup>*</sup></td>
+	  <td><a href="https://people.csail.mit.edu/changil/">Changil Kim</a><sup>* &#10013;</sup></td>
+      <td><a href="https://ai.google/research/people/InbarMosseri">Inbar Mosseri</a></td>
+      <td><a href="https://billf.mit.edu/">William T. Freeman</a><sup>&#10013;</sup></td>
+      <td><a href="http://people.csail.mit.edu/mrub/">Michael Rubinstein<sup> </sup></a></td>
+      <td><a href="http://people.csail.mit.edu/wojciech">Wojciech Matusik</a><sup>&#10013;</sup></td>
+    </tr>
+  </table>
+  <br />
+  <table border="0" align="center" class="affiliations">
+    <tr align="center" valign="middle">
+      <td width="120" align="right" style="padding:0 0px 0 0px;"><img src="images/mit_csail_logo.png" width="105" height="72" alt=""/></td>
+	<td width="97" align="left" style="padding:0 0px 0 0px;"><sup>&#10013;</sup> <a href="https://www.csail.mit.edu/">MIT CSAIL</a></td>
+    </tr>
+  </table>
+  <br />
+  <table width="200" border="0" align="center">
+    <tr>
+      <td class="caption"><img src="images/teaser_side.jpg" width="270" alt=""/></td>
+      <td class="caption"><table width="75%" border="0" align="right" cellpadding="0">
+        <tbody>
+          <tr>
+            <td width="16%"><img src="images/teaser/orig/0024Daniel_Craig_L1Ltxf1NeL8_0000007.jpg" width="100" /></td>
+            <td width="16%"><img src="images/teaser/orig/1044Phyllis_Diller_qoc0k5YwbRI_0000019.jpg" width="100" /></td>
+            <td width="16%"><img src="images/teaser/orig/0014Kodi_Smit-McPhee_NUZdfoqhB8o_0000015.jpg" width="100" /></td>
+            <td width="16%"><img src="images/teaser/orig/1114Maria_Sharapova_rWaBVelzaFk_0000022.jpg" width="100" /></td>
+            <td width="16%"><img src="images/teaser/orig/0022Andre_Braugher_p5AJtU5gclc_0000004.jpg" width="100" /></td>
+            <td width="20%"><img src="images/teaser/orig/1111Parineeti_Chopra_2yUgv3B_YcI_0000002.jpg" width="100" /></td>
+          </tr>
+          <tr>
+            <td colspan="6" align="center">True face (only for reference)</td>
+          </tr>
+          <tr>
+            <td><audio controls="controls" style="width: 110px;">
+              <source src="images/teaser/wav/0024Daniel_Craig_L1Ltxf1NeL8_0000007.wav" type="audio/wav" />
+              Does not support </audio></td>
+            <td><audio controls="controls" style="width: 110px;">
+              <source src="images/teaser/wav/1044Phyllis_Diller_qoc0k5YwbRI_0000019.wav" type="audio/wav" />
+              Does not support </audio></td>
+            <td><audio controls="controls" style="width: 110px;">
+              <source src="images/teaser/wav/0014Kodi_Smit-McPhee_NUZdfoqhB8o_0000015.wav" type="audio/wav" />
+              Does not support </audio></td>
+            <td><audio controls="controls" style="width: 110px;">
+              <source src="images/teaser/wav/1114Maria_Sharapova_rWaBVelzaFk_0000022.wav" type="audio/wav" />
+              Does not support </audio></td>
+            <td><audio controls="controls" style="width: 110px;">
+              <source src="images/teaser/wav/0022Andre_Braugher_p5AJtU5gclc_0000004.wav" type="audio/wav" />
+              Does not support </audio></td>
+            <td><audio controls="controls" style="width: 110px;">
+              <source src="images/teaser/wav/1111Parineeti_Chopra_2yUgv3B_YcI_0000002.wav" type="audio/wav" />
+              Does not support </audio></td>
+          </tr>
+          <tr>
+            <td colspan="6" align="center">Input waveforms</td>
+          </tr>
+          <tr>
+            <td><img src="images/teaser/s2f/0024Daniel_Craig_L1Ltxf1NeL8_0000007.jpg" width="100" /></td>
+            <td><img src="images/teaser/s2f/1044Phyllis_Diller_qoc0k5YwbRI_0000019.jpg" width="100" /></td>
+            <td><img src="images/teaser/s2f/0014Kodi_Smit-McPhee_NUZdfoqhB8o_0000015.jpg" width="100" /></td>
+            <td><img src="images/teaser/s2f/1114Maria_Sharapova_rWaBVelzaFk_0000022.jpg" width="100" /></td>
+            <td><img src="images/teaser/s2f/0022Andre_Braugher_p5AJtU5gclc_0000004.jpg" width="100" /></td>
+            <td><img src="images/teaser/s2f/1111Parineeti_Chopra_2yUgv3B_YcI_0000002.jpg" width="100" /></td>
+          </tr>
+          <tr>
+            <td colspan="6" align="center">Face reconstructed from speech</td>
+          </tr>
+        </tbody>
+      </table></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="caption"><p>We consider the task of reconstructing an image of a person’s face from a short input audio segment of speech. We show several results of our method on VoxCeleb dataset.<strong> Our model takes only an audio waveform as input </strong>(the true faces are shown just for reference)<strong>.</strong> Note that our goal is not to reconstruct an accurate image of the person, but rather to recover characteristic physical features that are correlated with the input speech. <br />
+        <br />
+        <em>*The three authors  contributed equally to this work.</em><br />
+      </p></td>
+    </tr>
+  </table>
+	<br />
+  <p><span class="section">Abstract</span> </p>
+  <p>How much can we infer about a person's looks from the way they speak? In this paper, we study the task of reconstructing a facial image of a person from a short audio recording of that person speaking. We design and train a deep neural network to perform this task using millions of natural videos of people speaking from 
+Internet/Youtube. During training, our model learns audiovisual, voice-face correlations that allow it to produce images that capture various physical attributes of the speakers such as age, gender and ethnicity. This is done in a self-supervised manner, by utilizing the natural co-occurrence of faces and speech in Internet videos, without the need to model attributes explicitly. 
+Our reconstructions, obtained directly from audio, reveal the  correlations between faces and voices. We evaluate and numerically quantify how--and in what manner--our Speech2Face reconstructions from audio resemble the true face images of the speakers.<br />
+	  &nbsp;<br />
+</p>
+  <p class="section">Paper</p>
+  <table border="0">
+    <tbody>
+      <tr>
+        <td height="195"><a href="https://arxiv.org/abs/1905.09773"><img src="images/webthumbnail.jpg" alt="" width="175" height="211"/></a></td>
+        <td>&nbsp;</td>
+	<td>&nbsp;</td>
+        <td>&quot;Speech2Face: Learning the Face Behind a Voice&quot;,<br/>
+            Tae-Hyun Oh, Tali Dekel, Changil Kim, Inbar Mosseri, William T. Freeman, Michael Rubinstein, Wojciech Matusik<br/>
+	IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2019<br/>
+        <p><a href="https://arxiv.org/abs/1905.09773">[Arxiv]</a></p></td>
+      </tr>
+    </tbody>
+  </table>
+&nbsp;<br />
+  <p class="section">Supplementary Material</p>
+  <table width="283" height="136" border="0">
+    <tbody>
+      <tr>
+        <td width="165"><a href="supplemental/index.html"><img src="images/supp_fig.jpg" alt="" width="207"/></a></td>
+        <td width="6">&nbsp;</td>
+        <td width="56"><p>[<a href="supplemental/index.html">Link</a>]</p></td>
+      </tr>
+    </tbody>
+  </table>
+&nbsp;<br />
+<p class="section">Ethical Considerations</p>
+  <table border="0">
+    <tbody>
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>
+		Although this is a purely academic investigation, we feel that it is important to explicitly discuss in the paper a set of ethical considerations due to the potential sensitivity of facial information.<br/>
+		&nbsp;<br/>
+	</td>
+	</tr>
+	<tr>
+	<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	<td>
+		<strong>Privacy.</strong> As mentioned, our method cannot recover the true identity of a person from their voice (i.e., an exact image of their face). 
+This is because our model is trained to capture visual features (related to age, gender, etc.) that are common to <i>many</i> individuals, and only in cases where there is strong enough evidence to connect those visual features with vocal/speech attributes in the data (see ``voice-face correlations'' below). As such, the model will only produce average-looking faces, with characteristic visual features that are correlated with the input speech. It will not produce images of specific individuals. <br/>
+		&nbsp;<br/>
+	</td></tr>
+	<tr>
+	<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	<td>
+		<strong>Voice-face correlations and dataset bias.</strong> Our model is designed to reveal statistical correlations that exist between facial features and voices of speakers in the training data. The training data we use is a collection of educational videos from YouTube, and does not represent equally the entire world population. Therefore, the model---as is the case with any machine learning model---is affected by this uneven distribution of data. <br/>
 
-    <p><b>Paper:</b> <a href="https://arxiv.org/abs/1810.04826">arXiv</a></p>
-    <p><b>Authors:</b> Quan Wang *, Hannah Muckenhirn *, Kevin Wilson,
-      Prashant Sridhar, Zelin Wu, John Hershey, Rif A. Saurous, Ron J. Weiss,
-      Ye Jia, Ignacio Lopez Moreno. <i>(*: Equal contribution.)</i>
-    </p>
+		More specifically, if a set of speakers might have vocal-visual traits that are relatively uncommon in the data, then the quality of our reconstructions for such cases may degrade.  For example, if a certain language does not appear in the training data, our reconstructions will not capture well the facial attributes that may be correlated with that language. <br/>
 
-    <p><b>Abstract:</b>
-      In this paper, we present a novel system that separates the voice of a target speaker from multi-speaker signals,
-      by making use of a reference signal from the target speaker. We achieve this by training two separate neural
-      networks: (1) A speaker recognition network that produces speaker-discriminative embeddings; (2) A spectrogram
-      masking network that takes both noisy spectrogram and speaker embedding as input, and produces a mask. Our system
-      significantly reduces the speech recognition WER on multi-speaker signals, with minimal WER degradation on
-      single-speaker signals.
-    </p>
-
-    <p><b>System architecture:</b></p>
-    <p><img src="resources/architecture.png" width="560"></p>
-
-    <p><b>Lectures:</b></p>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/gnRX2lzepz0" frameborder="0"
-      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    <br><br>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/c5HOuHSq6ag" frameborder="0"
-      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-    <p><b>Video demos:</b></p>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/2BF_1X7bmds" frameborder="0"
-      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    <br><br>
-    <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/HNzxOOB0Gbw" frameborder="0"
-      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
-
-    <h2>Random audio samples from LibriSpeech testing set</h2>
-
-    <p>VoiceFilter model: CNN + bi-LSTM + fully connected</p>
-
-    <h3>Apply VoiceFilter on noisy audio (2 speakers)</h3>
-
-    <p>Meaning of the columns in the table below:
-      <ol>
-        <li>The noisy audio input to the VoiceFilter. It's generated by summing the clean audio with an interference
-          audio from another speaker.</li>
-        <li>The output from the VoiceFilter.</li>
-        <li>The reference audio from which we extract the d-vector. The d-vector is another input to the VoiceFilter.
-          This audio comes from the same speaker as the clean audio.</li>
-        <li>The clean audio, which is the ground truth.</li>
-      </ol>
-    </p>
-    <table>
-      <thead>
-        <tr>
-          <th>Noisy audio input</th>
-          <th>Enhanced audio output</th>
-          <th>Reference audio for d-vector</th>
-          <th>Clean audio (ground truth)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/4831-18525-0005.3576-138058-0010.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/4831-18525-0005.3576-138058-0010.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/4831-29134-0017.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/4831-18525-0005.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/6841-88291-0003.1585-157660-0013.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/6841-88291-0003.1585-157660-0013.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/6841-88294-0035.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/6841-88291-0003.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/1988-147956-0028.84-121123-0026.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/1988-147956-0028.84-121123-0026.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/1988-148538-0011.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/1988-147956-0028.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/251-137823-0002.6455-67803-0007.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/251-137823-0002.6455-67803-0007.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/251-137823-0003.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/251-137823-0002.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/5849-50964-0009.6267-65525-0027.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/5849-50964-0009.6267-65525-0027.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/5849-50873-0018.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/5849-50964-0009.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/2078-142845-0028.4153-186222-0000.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/2078-142845-0028.4153-186222-0000.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/2078-142845-0015.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/2078-142845-0028.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/6241-61943-0015.84-121123-0002.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/6241-61943-0015.84-121123-0002.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/6241-66616-0019.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/6241-61943-0015.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/2902-9008-0008.116-288045-0003.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/2902-9008-0008.116-288045-0003.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/2902-9006-0010.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/2902-9008-0008.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/3081-166546-0036.3170-137482-0042.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/3081-166546-0036.3170-137482-0042.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/3081-166546-0016.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/3081-166546-0036.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/noisy/1701-141760-0023.251-136532-0023.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/2_speakers/enhanced/1701-141760-0023.251-136532-0023.wav" type="audio/wav"></audio>
-          </td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/1701-141759-0022.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/1701-141760-0023.wav" type="audio/wav"></audio></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>Apply VoiceFilter on clean audio (single speaker)</h3>
-
-    <p>Meaning of the columns in the table below:
-      <ol>
-        <li>The clean audio, which we feed as the input to the VoiceFilter.</li>
-        <li>The output from the VoiceFilter.</li>
-        <li>The reference audio from which we extract the d-vector. The d-vector is another input to the VoiceFilter.
-          This audio comes from the same speaker as the clean audio.</li>
-      </ol>
-    </p>
-    <table>
-      <thead>
-        <tr>
-          <th>Clean audio input</th>
-          <th>Enhanced audio output</th>
-          <th>Reference audio for d-vector</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/4831-18525-0005.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/4831-18525-0005.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/4831-29134-0017.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/6841-88291-0003.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/6841-88291-0003.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/6841-88294-0035.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/1988-147956-0028.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/1988-147956-0028.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/1988-148538-0011.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/251-137823-0002.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/251-137823-0002.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/251-137823-0003.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/5849-50964-0009.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/5849-50964-0009.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/5849-50873-0018.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/2078-142845-0028.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/2078-142845-0028.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/2078-142845-0015.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/6241-61943-0015.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/6241-61943-0015.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/6241-66616-0019.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/2902-9008-0008.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/2902-9008-0008.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/2902-9006-0010.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/3081-166546-0036.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/3081-166546-0036.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/3081-166546-0016.wav" type="audio/wav"></audio></td>
-        </tr>
-        <tr>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/clean/1701-141760-0023.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/single_speaker/enhanced/1701-141760-0023.wav" type="audio/wav"></audio></td>
-          <td><audio controls class="audio-player" preload="metadata">
-              <source src="audios/reference/1701-141759-0022.wav" type="audio/wav"></audio></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>FAQ</h2>
-
-    <h3>Can you share your code?</h3>
-
-    <p>
-      Unfortunately, the original VoiceFilter system heavily depends on
-      Google's internal infrastructure and data, thus cannot be open sourced.
-    </p>
-
-    <p>
-      However, thanks for the efforts by
-      <a href="http://swpark.me/">Seungwon Park</a>, a <b>third-party</b>
-      unofficial implementation using PyTorch is available on GitHub:
-    </p>
-
-    <p>
-      <a href="https://github.com/mindslab-ai/voicefilter">https://github.com/mindslab-ai/voicefilter</a>
-    </p>
-
-    <h3>In Table 4 of your paper, why SDR of "No VoiceFilter" is so high? Does it mean your problem is very easy?</h3>
-
-    <p>No. The high SDR is because of the way we prepare our training data - we trim the noisy audio to be the same
-      length as the clean audio for training.</p>
-
-    <p>For example, if the clean audio is 5 seconds, the interference audio is 1 second, then the resulting noisy audio
-      will consist of 1 second of really noisy audio, and 4 seconds of actually clean audio. Thus a big part of our
-      "noisy" audios are actually clean, and when we compute the SDR statistically, we get very large numbers
-      (especially the mean).</p>
-
-    <p>However, since we use the same volume for clean and interference audios, if we only look at the really noisy
-      parts of the noisy audio, the theoretically SDR should be 0.</p>
-
-    <p>So the conclusion: We are <b>NOT</b> solving a problem which is easier than others.</p>
-
-    <h2>Dataset information</h2>
-
-    <p>
-      For training and evaluating our VoiceFilter models, we had been using the
-      VCTK and LibriSpeech datasets.
-    </p>
-    <p>
-      Here we provide the division of
-      training-vs-testing as CSV files. Each line of the CSV files is a tuple
-      of three utterance IDs:
-    </p>
-    <p>
-      <b>
-        (clean utterance, utterance for computing d-vector, interference utterance)
-      </b>
-      <li>
-        <a href="https://github.com/google/speaker-id/tree/master/publications/VoiceFilter/dataset/VCTK">
-          VCTK training and testing</a>
-      </li>
-      <li>
-        <a href="https://github.com/google/speaker-id/tree/master/publications/VoiceFilter/dataset/LibriSpeech">
-          LibriSpeech training and testing</a>
-      </li>
-    </p>
-
-    <h2>Media coverage</h2>
-    <li><a
-        href="https://venturebeat.com/2018/10/12/google-researchers-use-ai-to-pick-out-voices-in-a-crowd/">VentureBeat</a>
-    </li>
-    <li><a href="https://tproger.ru/news/google-pick-out-voice/">Tproger</a></li>
-    <li><a href="https://www.jiqizhixin.com/articles/2018-10-17-8">机器之心</a></li>
-    <li><a href="http://www.sohu.com/a/259401844_473283">新智元</a></li>
-    <li><a
-        href="https://medium.com/%E6%88%91%E5%B0%B1%E5%95%8F%E4%B8%80%E5%8F%A5-%E6%80%8E%E9%BA%BC%E5%AF%AB/voicefilter-a-speakerid-based-speech-separation-by-google-ai-760ca30d81f">Medium</a>
-    </li>
-  </div>
+		Note that some of the features in our predicted faces may not even be physically connected to speech, for example hair color or style. However, if many speakers in the training set who speak in a similar way (e.g., in the same language) also share some common visual traits (e.g., a common hair color or style), then those visual traits may show up in the predictions. <br/>
+ 
+		For the above reasons, we recommend that any further investigation or practical use of this technology will be carefully tested to ensure that the training data is representative of the intended user population. If that is not the case, more representative data should be broadly collected. <br/>
+		&nbsp;<br/>
+	</td>
+	</tr>
+	<tr>
+	<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	<td>
+		<strong>Categories.</strong>
+		In our experimental section, we mention inferred demographic categories such as "White" and "Asian". These are categories defined and used by a commercial face attribute classifier (<a href="https://www.faceplusplus.com/">Face++</a>), and were only used for evaluation in this paper. Our model is not supplied with and does not make use of this information at any stage.<br/>
+		&nbsp;<br/>
+	</td>
+      </tr>
+    </tbody>
+  </table>
+<p class="section">Further Reading
+</p>
+<table border="0">
+  <tbody>
+    <tr>
+      <td width="6">&nbsp;</td>
+      <td width="6">&nbsp;</td>
+      <td width="977"><p><em>&quot;Seeing voices and hearing faces: Cross-modal biometric matching&quot;,  A. Nagrani, S. Albanie, and A. Zisserman, CVPR 2018</em></p>
+	<p><em>&quot;On Learning Associations of Faces and Voices&quot;, C. Kim, H. V. Shin, T.-H. Oh, A. Kaspar, M. Elgharib, and W. Matusik, ACCV 2018 </em></p>
+        <p><em>&quot;Wav2Pix: speech-conditioned face generation using generative adversarial networks&quot;, A. Duarte, F. Roldan, M. Tubau, J. Escur, S. Pascual, A. Salvador, E. Mohedano, K. McGuinness, J. Torres, and X. Giroi-Nieto, ICASSP 2019 </em></p>
+        <p><em>&quot;Disjoint mapping network for cross-modal matching of voices and faces&quot;, Y. Wen, M. A. Ismail, W. Liu, B. Raj, and R. Singh, ICLR 2019</em></p>
+        <p><em>&quot;Putting the face to the voice: Matching identity across modality&quot;, M. Kamachi, H. Hill, K. Lander, and E. Vatikiotis-Bateson, Current Biology, 2003        </em><em><br/>
+        </em></p></td>
+    </tr>
+  </tbody>
+</table>
+<p class="section">Acknowledgment</p>
+  <table border="0">
+    <tbody>
+      <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>
+		The authors would like to thank Suwon
+Shon, James Glass, Forrester Cole and Dilip Krishnan for
+helpful discussion. T.-H. Oh and C. Kim were supported by
+QCRI-CSAIL Computer Science Research Program at MIT.
+<br/>
+		&nbsp;<br/>
+	</td>
+	</tr>
+  </tbody>
+  </table>
+  <p>&nbsp;</p>
+  <p class="section">&nbsp;</p>
+  <!--
+  <p class="section">Google Research Blog</p>
+  <table width="1300" border="0">
+    <tbody>
+      <tr>
+        <td width="136"><img src="images/research_blog.png" width="200" height="131" alt=""/></td>
+        <td width="1048"><a href="https://research.googleblog.com/2017/08/making-visible-watermarks-more-effective.html"><img src="images/blog_post.png" width="300" height="166" alt=""/></a></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="section">Press</p>
+  <table border="0" cellpadding="10">
+    <tbody>
+      <tr>
+        <td><a href="https://www.theverge.com/2017/8/18/16162108/google-research-algorithm-watermark-removal-photo-protection"><img src="images/the_verge_2016_logo.png" width="200" height="37" alt=""/></a></td>
+        <td><a href="https://petapixel.com/2017/08/18/ai-can-easily-erase-photo-watermarks-heres-protect/"><img src="images/petapixel.png" width="200" height="50" alt=""/></a></td>
+        <td><a href="https://www.engadget.com/2017/08/18/google-flawlessly-remove-stock-photo-watermarks/"><img src="images/engadget.png" width="200" height="44" alt=""/></a></td>
+        <td><a href="https://www.wired.com/story/stock-photo-google-algorithm/"><img src="images/wired-logo.jpg" width="200" height="46" alt=""/></a></td>
+      </tr>
+      <tr>
+        <td><a href="http://www.dailymail.co.uk/sciencetech/article-4803562/Google-AI-easily-erase-watermarks-photos.html"><img src="images/dm_com_29.png" width="210" height="62" alt=""/></a></td>
+        <td><a href="https://thenextweb.com/google/2017/08/18/google-watermark-stock-photo-remove/"><img src="images/the_next_web_logo.jpg" width="190" height="100" alt=""/></a></td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="section">&nbsp;</p>
+  <p class="section">&nbsp;</p>
+  <p class="section">&nbsp;</p>
+-->
+  <p class="section">&nbsp;</p>
+</div>
 </body>
-
 </html>
